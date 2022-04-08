@@ -1,0 +1,78 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x1565dB843feB600996f3AffF82aEe473F46d78E5",
+    "txHash": "0xe21861c40bb7d02b8837cd5cc5a3f6f364b3f50d5b6cf14761acb514d607c414"
+  },
+  "proxies": [
+    {
+      "address": "0x608810444acC7654ac8401CDb0241C2D2DaE9E3e",
+      "txHash": "0x3fcfa76b0bdc142b4413f9c6c47327f617ee5c19d2142218295181358afa258b",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "b9d40b99bedc8300be9e52a69f8d82f115e304ab7e9f93b148c667ec891a1c31": {
+      "address": "0xaD725d8591faf63318A0b5FAaF73A2aE2f86211d",
+      "txHash": "0x9470b19f04702970b01e0b1ee3dcb05b363fdbebc7764408e32a9d1e280b3372",
+      "layout": {
+        "storage": [
+          {
+            "label": "_token",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(IAffinity)1107",
+            "contract": "OwnerProxy",
+            "src": "contracts/OwnerProxy.sol:24"
+          },
+          {
+            "label": "_uniswapV2Router02",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IUniswapV2Router02)830",
+            "contract": "OwnerProxy",
+            "src": "contracts/OwnerProxy.sol:27"
+          },
+          {
+            "label": "_uniswapV2PairAddress",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "OwnerProxy",
+            "src": "contracts/OwnerProxy.sol:30"
+          },
+          {
+            "label": "getOwnerProxyPermissions",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "OwnerProxy",
+            "src": "contracts/OwnerProxy.sol:33"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IAffinity)1107": {
+            "label": "contract IAffinity",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IUniswapV2Router02)830": {
+            "label": "contract IUniswapV2Router02",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    }
+  }
+}
