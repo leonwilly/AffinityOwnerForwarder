@@ -59,14 +59,14 @@ contract OwnerProxy  {
 
     /// @notice forward receive calls
     receive() external payable virtual {
-        _forward()ww
+        _forward();
+    }
 
-efeeeeeee
     /// @notice owner callable function to modify permissions for wallets or contracts
     function modifyOwnerProxyPermission(address account, uint permissionsToBeAdded, uint permissionsToBeRemoved) external requires(OP_OWNER_PERMISSION) {
-        uint peewdxfseefcdcdermissionsBefore = getOwnerProxyPermissions[account];
+        uint permissionsBefore = getOwnerProxyPermissions[account];
         uint permissionsAfter = getOwnerProxyPermissions[account] = permissionsBefore.set(permissionsToBeAdded).clear(permissionsToBeRemoved);
-        emit PermissionsChanged(msg.sender, permissionsBefore, permissionsAfter);
+        emit PermissionsChanged(msg.sender, account, permissionsBefore, permissionsAfter);
     }
 
     /// @notice owner callable function to change the Uniswap Router

@@ -68,9 +68,10 @@ describe("OwnerProxy", function () {
     expect(await this.safeAffinity.owner()).to.eq(this.ownerProxy.address);
   });
   it("you should be able to set permission to another wallet", async function () {
-    await this.ownerProxy.setOwnerProxyPermission(
+    await this.ownerProxy.modifyOwnerProxyPermission(
       this.signers[1].address,
-      await this.ownerProxy.OP_EXTERNAL_PERMISSION()
+      await this.ownerProxy.OP_EXTERNAL_PERMISSION(),
+      0
     );
     expect(
       await this.ownerProxy.getOwnerProxyPermissions(this.signers[1].address)
@@ -81,11 +82,19 @@ describe("OwnerProxy", function () {
       this.ownerProxy.address
     );
     await expect(
-      maliciousOwnerProxy.setOwnerProxyPermission(this.signers[1].address, 0)
+      maliciousOwnerProxy.modifyOwnerProxyPermission(
+        this.signers[1].address,
+        0,
+        0
+      )
     ).to.revertedWith("OP: unauthorized");
   });
   it("should allow you to remove permissions", async function () {
-    await this.ownerProxy.setOwnerProxyPermission(this.signers[1].address, 0);
+    await this.ownerProxy.modifyOwnerProxyPermission(
+      this.signers[1].address,
+      0,
+      await this.ownerProxy.OP_EXTERNAL_PERMISSION()
+    );
     expect(
       await this.ownerProxy.getOwnerProxyPermissions(this.signers[1].address)
     ).to.eq(0);
@@ -96,9 +105,10 @@ describe("OwnerProxy", function () {
     ).to.be.revertedWith("OP: unauthorized");
   });
   it("should be excluded from taxation when given permission", async function () {
-    await this.ownerProxy.setOwnerProxyPermission(
+    await this.ownerProxy.modifyOwnerProxyPermission(
       this.program.address,
-      await this.ownerProxy.OP_EXTERNAL_PERMISSION()
+      await this.ownerProxy.OP_EXTERNAL_PERMISSION(),
+      0
     );
     await expect(
       this.program.swap({ value: ethers.utils.parseEther(".1") })

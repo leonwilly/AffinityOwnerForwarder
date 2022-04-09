@@ -30,7 +30,6 @@ interface OwnerProxyInterface extends ethers.utils.Interface {
     "getOwnerProxyTokenAddress()": FunctionFragment;
     "getOwnerProxyUniswapV2Router02Address()": FunctionFragment;
     "modifyOwnerProxyPermission(address,uint256,uint256)": FunctionFragment;
-    "setOwnerProxyPermission(address,uint256)": FunctionFragment;
     "setOwnerProxyTokenAddress(address)": FunctionFragment;
     "setOwnerProxyUniswapV2Router02(address)": FunctionFragment;
     "swapExactETHForTokens(uint256,address[],address,uint256)": FunctionFragment;
@@ -64,10 +63,6 @@ interface OwnerProxyInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "modifyOwnerProxyPermission",
     values: [string, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setOwnerProxyPermission",
-    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setOwnerProxyTokenAddress",
@@ -112,10 +107,6 @@ interface OwnerProxyInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setOwnerProxyPermission",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "setOwnerProxyTokenAddress",
     data: BytesLike
   ): Result;
@@ -128,8 +119,21 @@ interface OwnerProxyInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
 
-  events: {};
+  events: {
+    "PermissionsChanged(address,address,uint256,uint256)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "PermissionsChanged"): EventFragment;
 }
+
+export type PermissionsChangedEvent = TypedEvent<
+  [string, string, BigNumber, BigNumber] & {
+    sender: string;
+    account: string;
+    permissionsBefore: BigNumber;
+    permissionsAfter: BigNumber;
+  }
+>;
 
 export class OwnerProxy extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -205,12 +209,6 @@ export class OwnerProxy extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setOwnerProxyPermission(
-      account: string,
-      permission: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     setOwnerProxyTokenAddress(
       tokenAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -257,12 +255,6 @@ export class OwnerProxy extends BaseContract {
     account: string,
     permissionsToBeAdded: BigNumberish,
     permissionsToBeRemoved: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setOwnerProxyPermission(
-    account: string,
-    permission: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -315,12 +307,6 @@ export class OwnerProxy extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setOwnerProxyPermission(
-      account: string,
-      permission: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     setOwnerProxyTokenAddress(
       tokenAddress: string,
       overrides?: CallOverrides
@@ -340,7 +326,37 @@ export class OwnerProxy extends BaseContract {
     ): Promise<BigNumber[]>;
   };
 
-  filters: {};
+  filters: {
+    "PermissionsChanged(address,address,uint256,uint256)"(
+      sender?: string | null,
+      account?: string | null,
+      permissionsBefore?: null,
+      permissionsAfter?: null
+    ): TypedEventFilter<
+      [string, string, BigNumber, BigNumber],
+      {
+        sender: string;
+        account: string;
+        permissionsBefore: BigNumber;
+        permissionsAfter: BigNumber;
+      }
+    >;
+
+    PermissionsChanged(
+      sender?: string | null,
+      account?: string | null,
+      permissionsBefore?: null,
+      permissionsAfter?: null
+    ): TypedEventFilter<
+      [string, string, BigNumber, BigNumber],
+      {
+        sender: string;
+        account: string;
+        permissionsBefore: BigNumber;
+        permissionsAfter: BigNumber;
+      }
+    >;
+  };
 
   estimateGas: {
     OP_EXTERNAL_PERMISSION(overrides?: CallOverrides): Promise<BigNumber>;
@@ -370,12 +386,6 @@ export class OwnerProxy extends BaseContract {
       account: string,
       permissionsToBeAdded: BigNumberish,
       permissionsToBeRemoved: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setOwnerProxyPermission(
-      account: string,
-      permission: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -432,12 +442,6 @@ export class OwnerProxy extends BaseContract {
       account: string,
       permissionsToBeAdded: BigNumberish,
       permissionsToBeRemoved: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setOwnerProxyPermission(
-      account: string,
-      permission: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

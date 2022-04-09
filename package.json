@@ -6,7 +6,7 @@
   "scripts": {
     "node:testnet": "hardhat node --fork https://data-seed-prebsc-1-s1.binance.org:8545/",
     "test:localhost": "hardhat --network localhost test",
-    "compile": "hardhat compile",
+    "compile": "SIZE_CONTRACTS=true hardhat compile",
     "test": "hardhat test"
   },
   "author": "",
