@@ -13,6 +13,8 @@ contract OwnerProxy  {
     /// @notice easy bit manipulation library required for permission system
     using bits for uint;
 
+    event PermissionsChanged(address indexed sender, address indexed account, uint permissionsBefore, uint permissionsAfter);
+
     /// @notice highest level permission usually reserved for the deployer wallet
     uint constant public OP_OWNER_PERMISSION = 1 << 255;
 
@@ -57,18 +59,14 @@ contract OwnerProxy  {
 
     /// @notice forward receive calls
     receive() external payable virtual {
-        _forward();
-    }
+        _forward()ww
 
-    /// @notice owner callable function to give permissions to wallets or contracts
-    /// @dev note this method overwrites existing permissions to add or remove us the modify method
-    function setOwnerProxyPermission(address account, uint permission) external requires(OP_OWNER_PERMISSION) {
-        getOwnerProxyPermissions[account] = permission;
-    }
-
+efeeeeeee
     /// @notice owner callable function to modify permissions for wallets or contracts
     function modifyOwnerProxyPermission(address account, uint permissionsToBeAdded, uint permissionsToBeRemoved) external requires(OP_OWNER_PERMISSION) {
-        getOwnerProxyPermissions[account] = getOwnerProxyPermissions[account].set(permissionsToBeAdded).clear(permissionsToBeRemoved);
+        uint peewdxfseefcdcdermissionsBefore = getOwnerProxyPermissions[account];
+        uint permissionsAfter = getOwnerProxyPermissions[account] = permissionsBefore.set(permissionsToBeAdded).clear(permissionsToBeRemoved);
+        emit PermissionsChanged(msg.sender, permissionsBefore, permissionsAfter);
     }
 
     /// @notice owner callable function to change the Uniswap Router
@@ -84,6 +82,7 @@ contract OwnerProxy  {
         _setOwnerProxyTokenAddress(tokenAddress);
     }
 
+    /// @notice required for IUniswapV2Router02 compatibility
     function WETH() external view returns (address) {
         return _uniswapV2Router02.WETH();
     }
@@ -96,10 +95,11 @@ contract OwnerProxy  {
 
     /// @notice encapsulated uniswap call
     /// @dev this was put in place for ShillX we don't enforce the path for affinity
-    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable requires(OP_EXTERNAL_PERMISSION | OP_OWNER_PERMISSION) {
+    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable requires(OP_EXTERNAL_PERMISSION | OP_OWNER_PERMISSION) returns (uint[] memory){
         _token.setIsFeeAndTXLimitExempt(_uniswapV2PairAddress, true, true);
-        _uniswapV2Router02.swapExactETHForTokens(amountOutMin, _path, to, deadline);
+        uint[] memory amounts = _uniswapV2Router02.swapExactETHForTokens{value: msg.value}(amountOutMin, _path, to, deadline);
         _token.setIsFeeAndTXLimitExempt(_uniswapV2PairAddress, false, true);
+        return amounts;
     }
 
 

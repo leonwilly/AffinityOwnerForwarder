@@ -1,79 +1,62 @@
 // @ts-nocheck
 import { expect } from "chai";
 import hre, { ethers, upgrades } from "hardhat";
-import SafeManagerABI from "./SafeManagerABI.json";
-import AffinityABI from "./AffinityABI.json";
 
-const SAFE_MANAGER_ADDRESS = "0xDa47a6923f3f9a9d57242a05051B03bC2d28d2A0"; // needed to replace
-// SafeAffinity: 0xbb3ce748b884948625b07ee475c5e227e35e4e66
-// 0x1fd455fdfd26962fce5c694bd8028d64a5ed6026
-//deployerWalletAddress
-
-async function deploy(
-  this: any,
-  safeManagerAddress: string,
-  uniswapV2RouterO2Address: string,
-  deployerWalletAddress: string | undefined
-) {
+async function deploy(this: any, uniswapV2RouterO2Address: string) {
   this.OwnerProxy = await ethers.getContractFactory("OwnerProxy");
   this.signer = await ethers.getSigner();
   this.signers = [...(await ethers.getSigners())];
+  this.SafeAffinity = await ethers.getContractFactory("SafeAffinity");
+  this.safeAffinity = await this.SafeAffinity.deploy(
+    this.signer.address,
+    uniswapV2RouterO2Address
+  );
+  this.SafeMaster = await ethers.getContractFactory("SafeMaster");
+  this.safeMaster = await this.SafeMaster.deploy(this.safeAffinity.address);
+  const router = await ethers.getContractAt(
+    "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol:IUniswapV2Router02",
+    uniswapV2RouterO2Address
+  );
+  const factory = await ethers.getContractAt(
+    "IUniswapV2Factory",
+    await router.factory()
+  );
+  await factory.createPair(this.signer.address, await router.WETH());
+  // transfer the balance to the generated wallet loaded with ETH
+  await this.safeAffinity.approve(
+    router.address,
+    await this.safeAffinity.balanceOf(this.signer.address)
+  );
+  await router.addLiquidityETH(
+    this.safeAffinity.address,
+    await this.safeAffinity.balanceOf(this.signer.address),
+    0,
+    0,
+    this.signer.address,
+    ethers.constants.MaxInt256,
+    { value: ethers.utils.parseEther("100") }
+  );
+  await this.safeAffinity.transferOwnership(this.safeMaster.address);
 
-  this.deployerSigner = this.signers[0];
-  if (deployerWalletAddress) {
-    // impersonate the wallet so we can sign for the owner on testnet
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [deployerWalletAddress],
-    });
-    this.deployerSigner = await ethers.getSigner(deployerWalletAddress);
-  }
-  this.safeManager = new ethers.Contract(
-    safeManagerAddress,
-    SafeManagerABI,
-    this.deployerSigner
+  this.ownerProxy = await this.OwnerProxy.deploy(
+    this.safeAffinity.address,
+    uniswapV2RouterO2Address
+  );
+  const ShillXProgram = await ethers.getContractFactory("ShillXProgram");
+  this.program = await ShillXProgram.deploy(
+    await this.ownerProxy.getOwnerProxyTokenAddress(),
+    this.ownerProxy.address
   );
 }
 
 describe("OwnerProxy", function () {
   before(async function () {
-    await deploy.call(
-      this,
-      "0xDa47a6923f3f9a9d57242a05051B03bC2d28d2A0",
-      "0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3",
-      "0x1fd455fdfd26962fce5c694bd8028d64a5ed6026"
-    );
-  });
-
-  it("create a liquidity pair and then add liquidity to test the swap", async function () {
-    await this.safeManager.transferAffinityOwnership(this.signer.address);
-    const affinity = new ethers.Contract(
-      await this.safeManager.affinityAddr(),
-      AffinityABI,
-      this.deployerSigner
-    );
-    expect(await affinity.owner()).to.eq(this.signer.address);
-  });
-  it("it should deploy owner proxy", async function () {
-    this.ownerProxy = await this.OwnerProxy.deploy(
-      "0xbb3ce748b884948625b07ee475c5e227e35e4e66",
-      "0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3"
-    );
-    const ShillXProgram = await ethers.getContractFactory("ShillXProgram");
-    this.program = await ShillXProgram.deploy(
-      await this.ownerProxy.getOwnerProxyTokenAddress(),
-      this.ownerProxy.address
-    );
-    this.affinity = new ethers.Contract(
-      this.ownerProxy.address,
-      AffinityABI,
-      this.signer
-    );
+    await deploy.call(this, "0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3");
   });
   it("it should have the correct token address after construction", async function () {
-    expect(
-      (await this.ownerProxy.getOwnerProxyTokenAddress()).toUpperCase()
-    ).to.eq("0xbb3ce748b884948625b07ee475c5e227e35e4e66".toUpperCase());
+    expect(await this.ownerProxy.getOwnerProxyTokenAddress()).to.eq(
+      this.safeAffinity.address
+    );
   });
   it("it should have the correct uniswap addresss after contruction", async function () {
     expect(await this.ownerProxy.getOwnerProxyUniswapV2Router02Address()).to.eq(
@@ -81,13 +64,8 @@ describe("OwnerProxy", function () {
     );
   });
   it("you should be able to transfer ownership from existing manager to new proxy", async function () {
-    const affinity = new ethers.Contract(
-      await this.ownerProxy.getOwnerProxyTokenAddress(),
-      AffinityABI,
-      this.signer
-    );
-    await affinity.transferOwnership(this.ownerProxy.address);
-    expect(await this.affinity.owner()).to.eq(this.ownerProxy.address);
+    await this.safeMaster.transferAffinityOwnership(this.ownerProxy.address);
+    expect(await this.safeAffinity.owner()).to.eq(this.ownerProxy.address);
   });
   it("you should be able to set permission to another wallet", async function () {
     await this.ownerProxy.setOwnerProxyPermission(
@@ -112,20 +90,18 @@ describe("OwnerProxy", function () {
       await this.ownerProxy.getOwnerProxyPermissions(this.signers[1].address)
     ).to.eq(0);
   });
-  /**
-   * The following test fail because there isn't a pair or liquidity pool on testnet.
-   * Please create a liquidity pool so I can complete the last two tests.
-   */
   it("program should not be excluded by default", async function () {
-    expect(await this.program.swap({ value: ethers.utils.parseEther("1.0") }))
-      .to.be.false;
+    await expect(
+      this.program.swap({ value: ethers.utils.parseEther(".1") })
+    ).to.be.revertedWith("OP: unauthorized");
   });
   it("should be excluded from taxation when given permission", async function () {
     await this.ownerProxy.setOwnerProxyPermission(
       this.program.address,
       await this.ownerProxy.OP_EXTERNAL_PERMISSION()
     );
-    expect(await this.program.swap({ value: ethers.utils.parseEther("1.0") }))
-      .to.be.true;
+    await expect(
+      this.program.swap({ value: ethers.utils.parseEther(".1") })
+    ).to.not.be.revertedWith("OP: Unauthorized");
   });
 });

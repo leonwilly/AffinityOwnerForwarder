@@ -337,7 +337,7 @@ export class OwnerProxy extends BaseContract {
       to: string,
       deadline: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber[]>;
   };
 
   filters: {};

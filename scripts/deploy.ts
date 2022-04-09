@@ -4,40 +4,21 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 import hre, { ethers } from "hardhat";
-import SafeManagerABI from "../test/SafeManagerABI.json";
-import AffinityABI from "../test/AffinityABI.json";
 
 async function deploy(
   this: any,
-  safeManagerAddress: string,
-  uniswapV2RouterO2Address: string,
-  deployerWalletAddress?: string
+  safeMasterAaddress: string,
+  uniswapV2RouterO2Address: string
 ) {
   this.OwnerProxy = await ethers.getContractFactory("OwnerProxy");
-  this.signer = await ethers.getSigner();
-  this.signers = [...(await ethers.getSigners())];
+  this.SafeMaster = await ethers.getContractFactory("");
+  this.safeMaster = await ethers.getContractAt(
+    "SafeMaster",
+    safeMasterAaddress
+  );
   this.ownerProxy = await this.OwnerProxy.deploy(
-    "0xbb3ce748b884948625b07ee475c5e227e35e4e66",
+    await this.safeMaster.getAffinityTokenAddress(),
     uniswapV2RouterO2Address
-  );
-  let deployerSigner = this.signers[0];
-  if (deployerWalletAddress) {
-    // impersonate the wallet so we can sign for the owner on testnet
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [deployerWalletAddress],
-    });
-    deployerSigner = await ethers.getSigner(deployerWalletAddress);
-  }
-  this.safeManager = new ethers.Contract(
-    safeManagerAddress,
-    SafeManagerABI,
-    deployerSigner
-  );
-  this.affinity = new ethers.Contract(
-    this.ownerProxy.address,
-    AffinityABI,
-    this.signer
   );
 }
 
@@ -56,6 +37,7 @@ async function main() {
     "0x670272316237229b82E40B42B9f3Faf43e967B39",
     "0x10ED43C718714eb63d5aA57B78B54704E256024E"
   );
+  await ctx.safeMaster.transferAffinityOwnership(ctx.ownerProxy.address);
   console.log(`OwnerProxy deployed at ${ctx.ownerProxy}`);
 }
 

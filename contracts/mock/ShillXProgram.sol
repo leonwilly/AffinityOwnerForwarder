@@ -11,7 +11,7 @@ contract ShillXProgram {
     address[] _path;
 
     constructor(address token, address router) {
-        _token = IERC20(_token);
+        _token = IERC20(token);
         _router = IUniswapV2Router02(router);
         _path = new address[](2);
     (_path[0], _path[1]) = (_router.WETH(), token);

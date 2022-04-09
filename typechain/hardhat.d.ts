@@ -13,6 +13,10 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
       name: "Proxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Proxy__factory>;
@@ -41,6 +45,26 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IAffinity__factory>;
     getContractFactory(
+      name: "AffinityDistributor",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AffinityDistributor__factory>;
+    getContractFactory(
+      name: "Auth",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Auth__factory>;
+    getContractFactory(
+      name: "IAffinityDistributor",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAffinityDistributor__factory>;
+    getContractFactory(
+      name: "SafeAffinity",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SafeAffinity__factory>;
+    getContractFactory(
+      name: "SafeMaster",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SafeMaster__factory>;
+    getContractFactory(
       name: "ShillXProgram",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ShillXProgram__factory>;
@@ -49,6 +73,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OwnerProxy__factory>;
 
+    getContractAt(
+      name: "Ownable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ownable>;
     getContractAt(
       name: "Proxy",
       address: string,
@@ -84,6 +113,31 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IAffinity>;
+    getContractAt(
+      name: "AffinityDistributor",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AffinityDistributor>;
+    getContractAt(
+      name: "Auth",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Auth>;
+    getContractAt(
+      name: "IAffinityDistributor",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAffinityDistributor>;
+    getContractAt(
+      name: "SafeAffinity",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SafeAffinity>;
+    getContractAt(
+      name: "SafeMaster",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SafeMaster>;
     getContractAt(
       name: "ShillXProgram",
       address: string,
