@@ -17,11 +17,10 @@ async function deploy(this: any, uniswapV2RouterO2Address: string) {
     "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol:IUniswapV2Router02",
     uniswapV2RouterO2Address
   );
-  const factory = await ethers.getContractAt(
-    "IUniswapV2Factory",
-    await router.factory()
-  );
-  await factory.createPair(this.signer.address, await router.WETH());
+  // const factory = await ethers.getContractAt(
+  //   "IUniswapV2Factory",
+  //   await router.factory()
+  // );
   // transfer the balance to the generated wallet loaded with ETH
   await this.safeAffinity.approve(
     router.address,
@@ -47,6 +46,7 @@ async function deploy(this: any, uniswapV2RouterO2Address: string) {
     await this.ownerProxy.getOwnerProxyTokenAddress(),
     this.ownerProxy.address
   );
+  this.affinityProxy = this.safeAffinity.attach(this.ownerProxy.address);
 }
 
 describe("OwnerProxy", function () {
@@ -113,5 +113,10 @@ describe("OwnerProxy", function () {
     await expect(
       this.program.swap({ value: ethers.utils.parseEther(".1") })
     ).to.not.be.revertedWith("OP: Unauthorized");
+  });
+  it("after successful swap liquidity pair should be set back to taxed", async function () {
+    expect(
+      await this.affinityProxy.getIsFeeExempt(await this.safeAffinity.pair())
+    ).to.be.false;
   });
 });
