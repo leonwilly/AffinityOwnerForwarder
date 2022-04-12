@@ -3,7 +3,7 @@ import { expect } from "chai";
 import hre, { ethers, upgrades } from "hardhat";
 
 async function deploy(this: any, uniswapV2RouterO2Address: string) {
-  this.OwnerProxy = await ethers.getContractFactory("OwnerProxy");
+  this.OwnerForwarder = await ethers.getContractFactory("OwnerForwarder");
   this.signer = await ethers.getSigner();
   this.signers = [...(await ethers.getSigners())];
   this.SafeAffinity = await ethers.getContractFactory("SafeAffinity");
@@ -37,52 +37,56 @@ async function deploy(this: any, uniswapV2RouterO2Address: string) {
   );
   await this.safeAffinity.transferOwnership(this.safeMaster.address);
 
-  this.ownerProxy = await this.OwnerProxy.deploy(
+  this.ownerForwarder = await this.OwnerForwarder.deploy(
     this.safeAffinity.address,
     uniswapV2RouterO2Address
   );
   const ShillXProgram = await ethers.getContractFactory("ShillXProgram");
   this.program = await ShillXProgram.deploy(
-    await this.ownerProxy.getOwnerProxyTokenAddress(),
-    this.ownerProxy.address
+    await this.ownerForwarder.getOwnerForwarderTokenAddress(),
+    this.ownerForwarder.address
   );
-  this.affinityProxy = this.safeAffinity.attach(this.ownerProxy.address);
+  this.affinityProxy = this.safeAffinity.attach(this.ownerForwarder.address);
 }
 
-describe("OwnerProxy", function () {
+describe("OwnerForwarder", function () {
   before(async function () {
     await deploy.call(this, "0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3");
   });
   it("it should have the correct token address after construction", async function () {
-    expect(await this.ownerProxy.getOwnerProxyTokenAddress()).to.eq(
+    expect(await this.ownerForwarder.getOwnerForwarderTokenAddress()).to.eq(
       this.safeAffinity.address
     );
   });
   it("it should have the correct uniswap addresss after contruction", async function () {
-    expect(await this.ownerProxy.getOwnerProxyUniswapV2Router02Address()).to.eq(
-      "0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3"
-    );
+    expect(
+      await this.ownerForwarder.getOwnerForwarderUniswapV2Router02Address()
+    ).to.eq("0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3");
   });
   it("you should be able to transfer ownership from existing manager to new proxy", async function () {
-    await this.safeMaster.transferAffinityOwnership(this.ownerProxy.address);
-    expect(await this.safeAffinity.owner()).to.eq(this.ownerProxy.address);
+    await this.safeMaster.transferAffinityOwnership(
+      this.ownerForwarder.address
+    );
+    expect(await this.safeAffinity.owner()).to.eq(this.ownerForwarder.address);
   });
   it("you should be able to set permission to another wallet", async function () {
-    await this.ownerProxy.modifyOwnerProxyPermission(
+    await this.ownerForwarder.modifyOwnerForwarderPermission(
       this.signers[1].address,
-      await this.ownerProxy.OP_EXTERNAL_PERMISSION(),
+      await this.ownerForwarder.OF_EXTERNAL_PERMISSION(),
       0
     );
     expect(
-      await this.ownerProxy.getOwnerProxyPermissions(this.signers[1].address)
-    ).to.eq(await this.ownerProxy.OP_EXTERNAL_PERMISSION());
+      await this.ownerForwarder.getOwnerForwarderPermissions(
+        this.signers[1].address
+      )
+    ).to.eq(await this.ownerForwarder.OF_EXTERNAL_PERMISSION());
   });
   it("should prevent unauthorized access", async function () {
-    const maliciousOwnerProxy = this.OwnerProxy.connect(this.signers[2]).attach(
-      this.ownerProxy.address
-    );
+    const maliciousOwnerForwarder = this.OwnerForwarder.connect(
+      this.signers[2]
+    ).attach(this.ownerForwarder.address);
     await expect(
-      maliciousOwnerProxy.modifyOwnerProxyPermission(
+      maliciousOwnerForwarder.modifyOwnerForwarderPermission(
         this.signers[1].address,
         0,
         0
@@ -90,13 +94,15 @@ describe("OwnerProxy", function () {
     ).to.revertedWith("OP: unauthorized");
   });
   it("should allow you to remove permissions", async function () {
-    await this.ownerProxy.modifyOwnerProxyPermission(
+    await this.ownerForwarder.modifyOwnerForwarderPermission(
       this.signers[1].address,
       0,
-      await this.ownerProxy.OP_EXTERNAL_PERMISSION()
+      await this.ownerForwarder.OF_EXTERNAL_PERMISSION()
     );
     expect(
-      await this.ownerProxy.getOwnerProxyPermissions(this.signers[1].address)
+      await this.ownerForwarder.getOwnerForwarderPermissions(
+        this.signers[1].address
+      )
     ).to.eq(0);
   });
   it("program should not be excluded by default", async function () {
@@ -105,9 +111,9 @@ describe("OwnerProxy", function () {
     ).to.be.revertedWith("OP: unauthorized");
   });
   it("should be excluded from taxation when given permission", async function () {
-    await this.ownerProxy.modifyOwnerProxyPermission(
+    await this.ownerForwarder.modifyOwnerForwarderPermission(
       this.program.address,
-      await this.ownerProxy.OP_EXTERNAL_PERMISSION(),
+      await this.ownerForwarder.OF_EXTERNAL_PERMISSION(),
       0
     );
     await expect(

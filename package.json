@@ -7,13 +7,14 @@
     "node:testnet": "hardhat node --fork https://data-seed-prebsc-1-s1.binance.org:8545/",
     "test:localhost": "hardhat --network localhost test",
     "compile": "SIZE_CONTRACTS=true hardhat compile",
+    "deploy:testnet": "hardhat run scripts/deploy.ts",
+    "deploy:mainnet": "hardhat run scripts/deploy.ts",
     "test": "hardhat test"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
-    "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@openzeppelin/contracts": "^4.5.0",
     "@openzeppelin/hardhat-upgrades": "^1.17.0",

@@ -2,7 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { Ownable } from "./Ownable";
-export type { Proxy } from "./Proxy";
 export type { IERC20 } from "./IERC20";
 export type { IUniswapV2Factory } from "./IUniswapV2Factory";
 export type { IUniswapV2Pair } from "./IUniswapV2Pair";
@@ -15,10 +14,9 @@ export type { IAffinityDistributor } from "./IAffinityDistributor";
 export type { SafeAffinity } from "./SafeAffinity";
 export type { SafeMaster } from "./SafeMaster";
 export type { ShillXProgram } from "./ShillXProgram";
-export type { OwnerProxy } from "./OwnerProxy";
+export type { OwnerForwarder } from "./OwnerForwarder";
 
 export { Ownable__factory } from "./factories/Ownable__factory";
-export { Proxy__factory } from "./factories/Proxy__factory";
 export { IERC20__factory } from "./factories/IERC20__factory";
 export { IUniswapV2Factory__factory } from "./factories/IUniswapV2Factory__factory";
 export { IUniswapV2Pair__factory } from "./factories/IUniswapV2Pair__factory";
@@ -31,4 +29,4 @@ export { IAffinityDistributor__factory } from "./factories/IAffinityDistributor_
 export { SafeAffinity__factory } from "./factories/SafeAffinity__factory";
 export { SafeMaster__factory } from "./factories/SafeMaster__factory";
 export { ShillXProgram__factory } from "./factories/ShillXProgram__factory";
-export { OwnerProxy__factory } from "./factories/OwnerProxy__factory";
+export { OwnerForwarder__factory } from "./factories/OwnerForwarder__factory";

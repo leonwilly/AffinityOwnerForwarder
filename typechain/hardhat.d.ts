@@ -17,10 +17,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
     getContractFactory(
-      name: "Proxy",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Proxy__factory>;
-    getContractFactory(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
@@ -69,20 +65,15 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ShillXProgram__factory>;
     getContractFactory(
-      name: "OwnerProxy",
+      name: "OwnerForwarder",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.OwnerProxy__factory>;
+    ): Promise<Contracts.OwnerForwarder__factory>;
 
     getContractAt(
       name: "Ownable",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
-    getContractAt(
-      name: "Proxy",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Proxy>;
     getContractAt(
       name: "IERC20",
       address: string,
@@ -144,10 +135,10 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ShillXProgram>;
     getContractAt(
-      name: "OwnerProxy",
+      name: "OwnerForwarder",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.OwnerProxy>;
+    ): Promise<Contracts.OwnerForwarder>;
 
     // default types
     getContractFactory(
